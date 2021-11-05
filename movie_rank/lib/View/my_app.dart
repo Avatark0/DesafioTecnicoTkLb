@@ -26,9 +26,10 @@ class _MyAppState extends State<MyApp>{
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Tokenlab Desafio Tecnico',
+      theme: ThemeData(scaffoldBackgroundColor: Colors.purple.shade100),
       home: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.teal,
+          backgroundColor: Colors.purple.shade300,
           elevation: 0.5,
           title: const Text('Tokenlab Mobile - Desafio Técnico'),
         ),
@@ -38,13 +39,12 @@ class _MyAppState extends State<MyApp>{
             future: futureMovieList,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                //return _moviesListView(snapshot);
                 return _listView(snapshot);
               } else if (snapshot.hasError) {
-                return Text('${snapshot.error}');
+                return _containerErrorMessage(snapshot);
               }
               // By default, show a loading spinner.
-              return const CircularProgressIndicator();
+              return _containerLoadingAnimation();
             }
           ),
         ),
@@ -54,6 +54,7 @@ class _MyAppState extends State<MyApp>{
     );
   }
 
+//Implementation of the horizontal list, cache controll
   ListView _listView(AsyncSnapshot snapshot){
     return ListView.builder(
       scrollDirection: Axis.horizontal,
@@ -61,12 +62,12 @@ class _MyAppState extends State<MyApp>{
       padding: const EdgeInsets.all(18.0),
       itemCount: snapshot.data!.length,
       itemBuilder: (BuildContext context, int index) {
-        return _container(snapshot, index);
+        return _containerCachedImage(snapshot, index);
       }
     );
   }
 
-  Widget _container(AsyncSnapshot snapshot, int index){
+  Widget _containerCachedImage(AsyncSnapshot snapshot, int index){
     return Container(
       child: 
         Stack(children: <Widget>[
@@ -80,18 +81,17 @@ class _MyAppState extends State<MyApp>{
             )
           )
         ]),
-      color: Colors.purple,
+      color: Colors.purple.shade200,
       width: 400,
       //padding: const EdgeInsets.all(20.0),
-      margin: const EdgeInsets.all(10.0),
+      margin: const EdgeInsets.all(18.0),
     );
   }
 
   CachedNetworkImage _cachedImage(AsyncSnapshot snapshot, int index){
     return CachedNetworkImage(
-      placeholder: (context, url) => const CircularProgressIndicator(),
-      errorWidget: (context,url,error) => Text(
-        snapshot.data![index].title),
+      placeholder: (context, url) => _containerLoadingAnimation(),
+      errorWidget: (context,url,error) => _containerImageNotLoaded(snapshot, index),
       imageUrl: snapshot.data![index].poster_url,
       fadeInCurve: Curves.bounceIn,
       fadeInDuration: const Duration(milliseconds: 1000),
@@ -108,13 +108,58 @@ class _MyAppState extends State<MyApp>{
 
   Widget _inkWell(AsyncSnapshot snapshot, int index){
     return InkWell(
-      //child: _container(snapshot, index),
       enableFeedback: true,
       onTap: (){
-      //  Navigator.push(context, route) {
-      //         //sideLength == 50 ? sideLength = 100 : sideLength = 50;
-      //   });
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => SecondRoute()),
+      // );
       }
+    );
+  }
+
+  //Container para mensagem de erro na conexão com o BD. Texto de template para uma imagem explicativa.
+  Widget _containerErrorMessage(AsyncSnapshot snapshot){
+    return Container(
+      child: Stack(children: <Widget>[
+          Positioned.fill(
+            child: Text(
+              '\n\n\n\n\n\n${snapshot.error}\n\nCheck your internet conection, or try again later.',
+              textAlign: TextAlign.center,
+            ),
+          )
+      ]),
+    );
+  }
+
+  Widget _containerImageNotLoaded(AsyncSnapshot snapshot, int index){
+    return Container(
+      child: Stack(children: <Widget>[
+          Positioned.fill(
+            child: Text(
+              '\n\n\n\n\n\n'+snapshot.data![index].title,
+              textAlign: TextAlign.center,
+            ),
+          )
+      ]),
+    );
+  }
+
+  Widget _containerLoadingAnimation(){
+    return Container(
+      //margin: const EdgeInsets.only(top: 100.0),
+      child: const Center(
+        child: 
+          SizedBox(
+            height: 100,
+            width: 100,
+            child: CircularProgressIndicator(
+              strokeWidth: 10,
+              valueColor: 
+              AlwaysStoppedAnimation(Colors.purple),
+            ),
+          ),
+      ),
     );
   }
 
