@@ -1,64 +1,70 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/rendering.dart';
+import 'package:movie_rank/values/constants.dart';
 
-import 'package:movie_rank/Model/Movie.dart';
-import 'package:movie_rank/Controller/fetch_movie_list.dart';
+import '/model/movie.dart';
+import '/controller/fetch_data.dart';
+import '/controller/transition_animation.dart';
+import 'movie_details.dart';
+import 'components/error_message.dart';
+import 'components/loading_animation.dart';
 
-class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+//Main view for the API
+class MovieList extends StatefulWidget {
+  const MovieList({Key? key}) : super(key: key);
   
   @override
-  _MyAppState createState() => _MyAppState();
+  _MovieListState createState() => _MovieListState();
 }
 
-class _MyAppState extends State<MyApp>{
+class _MovieListState extends State<MovieList>{
   late Future<List<Movie>> futureMovieList;
-  final String url = 'https://desafio-mobile.nyc3.digitaloceanspaces.com/movies';
 
   @override
   void initState() {
     super.initState();
-    futureMovieList = fetchMovieList(url);
+    futureMovieList = FetchData().fetchMovieList(UrlPath.mainUrl);
   }
   
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Tokenlab Desafio Tecnico',
       theme: ThemeData(scaffoldBackgroundColor: Colors.purple.shade100),
       home: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.purple.shade300,
           elevation: 0.5,
-          title: const Text('Tokenlab Mobile - Desafio Técnico'),
+          title: const Text('Tokenlab - TMDB'),
         ),
         body: 
         Center(
+          //Call to fetch the data.
           child: FutureBuilder<List<Movie>>(
             future: futureMovieList,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return _listView(snapshot);
               } else if (snapshot.hasError) {
-                return _containerErrorMessage(snapshot);
+                print('movie_list: error reading snapshot data');
+                return const ErrorMessage();
               }
-              // By default, show a loading spinner.
-              return _containerLoadingAnimation();
+              //While fetching, show a loading spinner.
+              return const LoadingAnimation();
             }
           ),
         ),
       ),
-
-      debugShowCheckedModeBanner: false,
     );
   }
 
-//Implementation of the horizontal list, cache controll
+  //Display the movie list and controls the cache for list items.
   ListView _listView(AsyncSnapshot snapshot){
     return ListView.builder(
       scrollDirection: Axis.horizontal,
-      cacheExtent: 400.0,
+      cacheExtent: 1000.0,
       padding: const EdgeInsets.all(18.0),
       itemCount: snapshot.data!.length,
       itemBuilder: (BuildContext context, int index) {
@@ -83,22 +89,21 @@ class _MyAppState extends State<MyApp>{
         ]),
       color: Colors.purple.shade200,
       width: 400,
-      //padding: const EdgeInsets.all(20.0),
       margin: const EdgeInsets.all(18.0),
     );
   }
 
   CachedNetworkImage _cachedImage(AsyncSnapshot snapshot, int index){
     return CachedNetworkImage(
-      placeholder: (context, url) => _containerLoadingAnimation(),
+      placeholder: (context, url) => const LoadingAnimation(),
       errorWidget: (context,url,error) => _containerImageNotLoaded(snapshot, index),
-      imageUrl: snapshot.data![index].poster_url,
+      imageUrl: snapshot.data![index].posterUrl,
       fadeInCurve: Curves.bounceIn,
       fadeInDuration: const Duration(milliseconds: 1000),
       imageBuilder: (context, imageProvider) => Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-              image: CachedNetworkImageProvider(snapshot.data![index].poster_url),
+              image: CachedNetworkImageProvider(snapshot.data![index].posterUrl),
               fit: BoxFit.fill,
           ),
         ),
@@ -107,61 +112,31 @@ class _MyAppState extends State<MyApp>{
   }
 
   Widget _inkWell(AsyncSnapshot snapshot, int index){
+    String movieId = snapshot.data![index].id.toString();
     return InkWell(
       enableFeedback: true,
       onTap: (){
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => SecondRoute()),
-      // );
-      }
-    );
-  }
-
-  //Container para mensagem de erro na conexão com o BD. Texto de template para uma imagem explicativa.
-  Widget _containerErrorMessage(AsyncSnapshot snapshot){
-    return Container(
-      child: Stack(children: <Widget>[
-          Positioned.fill(
-            child: Text(
-              '\n\n\n\n\n\n${snapshot.error}\n\nCheck your internet conection, or try again later.',
-              textAlign: TextAlign.center,
-            ),
-          )
-      ]),
-    );
-  }
-
-  Widget _containerImageNotLoaded(AsyncSnapshot snapshot, int index){
-    return Container(
-      child: Stack(children: <Widget>[
-          Positioned.fill(
-            child: Text(
-              '\n\n\n\n\n\n'+snapshot.data![index].title,
-              textAlign: TextAlign.center,
-            ),
-          )
-      ]),
-    );
-  }
-
-  Widget _containerLoadingAnimation(){
-    return Container(
-      //margin: const EdgeInsets.only(top: 100.0),
-      child: const Center(
-        child: 
-          SizedBox(
-            height: 100,
-            width: 100,
-            child: CircularProgressIndicator(
-              strokeWidth: 10,
-              valueColor: 
-              AlwaysStoppedAnimation(Colors.purple),
-            ),
-          ),
+        Navigator.push(
+          context,
+          NoAnimationMaterialPageRoute(builder: (context) => MovieDetails(movieId: movieId)),
+        );
+        setState(() {});
+      },
+      child: Container(
+        //color: Colors.orange,
       ),
     );
   }
 
+  Widget _containerImageNotLoaded(AsyncSnapshot snapshot, int index){
+    return Stack(children: <Widget>[
+        Positioned.fill(
+          child: Text(
+            '\n\n\n\n\n\n'+snapshot.data![index].title,
+            textAlign: TextAlign.center,
+          ),
+        )
+    ]);
+  }
 
 }

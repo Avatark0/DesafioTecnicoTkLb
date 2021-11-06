@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
-import 'View/my_app.dart';
+import 'view/movie_list.dart';
+import 'view/movie_details.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MaterialApp(
+      debugShowCheckedModeBanner: false,
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const MovieList(),
+        '/movie': (context) => const MovieDetails(movieId: '',),
+      },
+    )
+  );
 }
-
-
