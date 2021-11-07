@@ -6,9 +6,9 @@ import 'package:movie_rank/values/constants.dart';
 import '/model/movie.dart';
 import '/controller/fetch_data.dart';
 import '/controller/transition_animation.dart';
+import 'components/loading_animation.dart';
 import 'movie_details.dart';
 import 'components/error_message.dart';
-import 'components/loading_animation.dart';
 
 //Main view for the API
 class MovieList extends StatefulWidget {
@@ -95,8 +95,8 @@ class _MovieListState extends State<MovieList>{
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       image: DecorationImage(
-                          image: CachedNetworkImageProvider(snapshot.data![index].posterUrl),
-                          fit: BoxFit.fill,
+                        image: CachedNetworkImageProvider(snapshot.data![index].posterUrl),
+                        fit: BoxFit.fill,
                       ),
                     ),
                   ),

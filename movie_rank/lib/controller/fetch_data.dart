@@ -7,7 +7,7 @@ import '/controller/save_data.dart';
 
 //Fetch the data. Try to fetch from the internet, if unable, try to fetch from local storage.
 class FetchData{
-  static const int timeoutTime = 3;
+  static const int timeoutTime = 2;
 
   Future<List<Movie>> fetchMovieList(String url) async {
     const String movieListIdPath = 'MovieListData';
