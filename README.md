@@ -1,4 +1,4 @@
-# DesafioTecnicoTkLb - Flutter Movie Rank App
+# Desafio Tecnico Tokenlab - Flutter Movie Rank App
 
 This project is a prototype of an API REST that presents a list of the most popular 20 movies acording to the available data at The Movie Database(TMDB) API. It was devoleped as part of a tecnical chalenge for the Tokenlab company. 
 
