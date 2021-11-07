@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:movie_rank/values/constants.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '/model/movie.dart';
 import '/controller/fetch_data.dart';
 import 'components/error_message.dart';
 import 'components/loading_animation.dart';
 
+//Secondary view for the API
 class MovieDetails extends StatefulWidget {
   final String movieId;
 
@@ -36,16 +38,24 @@ class MovieDetails extends StatefulWidget {
         appBar: AppBar(
           backgroundColor: Colors.purple.shade300,
           elevation: 0.5,
-          title: const Text('Tokenlab - TMDB 2'),
+          title: Text(
+            'Tokenlab - TMDB',
+            style: TextStyle(
+              fontSize: 24, 
+              fontWeight: FontWeight.bold,
+              color: Colors.purple.shade800,
+            ),
+          ),
         ),
-        body: Center(
+        body: Padding(
+          padding: const EdgeInsets.all(12),
           child: FutureBuilder<Movie>(
             future: futureMovie,
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                return _listView(snapshot);
+                return _details(snapshot);
               } else if (snapshot.hasError) {
-                print('movie_details: error reading snapshot data');
+                  print('movie_details: error reading snapshot data');
                 return const ErrorMessage();
               }
               // By default, show a loading spinner.
@@ -57,34 +67,114 @@ class MovieDetails extends StatefulWidget {
     );
   }
 
-  Widget _listView(AsyncSnapshot<Movie> snapshot) {
-    return ListView.builder(
-      // scrollDirection: Axis.horizontal,
-      // cacheExtent: 400.0,
-      // padding: const EdgeInsets.all(18.0),
-       itemCount: 2,
-       itemBuilder: (BuildContext context, int index) {
-         return Text(snapshot.data!.title);
-      // return _containerCachedImage(snapshot, index);
-       }
-    );
-  }
-  // Widget _containerImageNotLoaded(AsyncSnapshot snapshot, int index){
-  //   return Stack(children: <Widget>[
-  //       Positioned.fill(
-  //         child: Text(
-  //           '\n\n\n\n\n\n'+snapshot.data![index].title,
-  //           textAlign: TextAlign.center,
-  //         ),
-  //       )
-  //   ]);
-  // }
-
-  // child: ElevatedButton(
-  //   onPressed: (){
-  //     Navigator.pop(context);
-  //   },
-  //   child: const Text('Go back!'),
-  // ),
+  Widget _details(AsyncSnapshot<Movie> snapshot) => Card(
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    color: Colors.purple.shade300,
+    child: Container(
+      height: double.infinity,
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(5),
+                bottomLeft: Radius.circular(5),
+              ),
+            ),
+            child: Row(
+              children: <Widget>[
+                Container(
+                  height: 150,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(5),
+                      bottomLeft: Radius.circular(5),
+                    ),
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: CachedNetworkImageProvider(snapshot.data!.posterUrl),
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.only(
+                    top: 10,
+                    left: 20,
+                  ),
+                  height: 150,
+                  child:  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(
+                        width: 200,
+                        child: Text(
+                          snapshot.data!.title,
+                          textAlign: TextAlign.left,
+                          style: const TextStyle(fontSize: 24),
+                        ),
+                      ),
+                      const SizedBox(height: 25),
+                      SizedBox(
+                        width: 200,
+                        child: Text(
+                          snapshot.data!.tagLine as String,
+                          textAlign: TextAlign.justify,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      )
+                    ],),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 25),
+          Container(
+            height: 324,
+            decoration: const BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(5),
+                bottomLeft: Radius.circular(5),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text('Release date: '+snapshot.data!.releaseDate,
+                  textAlign: TextAlign.justify,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 25),
+                Text(
+                  snapshot.data!.overview as String,
+                  textAlign: TextAlign.justify,
+                  style: const TextStyle(fontSize: 16),
+                ),
+              ],
+            ),
+          ),
+          Center(
+            child: ElevatedButton(
+              child: const Text('Return'),
+              onPressed: (){
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                primary: Colors.purple,
+                onPrimary: Colors.black,
+                textStyle: const TextStyle(
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ), 
+  );
 
 }

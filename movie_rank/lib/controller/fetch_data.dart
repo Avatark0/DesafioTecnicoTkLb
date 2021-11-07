@@ -39,7 +39,7 @@ class FetchData{
       }
     }
     //In case there is no conection to the internet, and a timeout exception is thrown.
-    on TimeoutException catch (e){
+    on TimeoutException{
       String recoveredData = await SaveData().readData(movieListIdPath);
       data = jsonDecode(recoveredData);
       if(data != null){
@@ -81,7 +81,7 @@ class FetchData{
       return movie;
     }
     //In case there is no conection to the internet, and a timeout exception is thrown.
-    on TimeoutException catch (e){
+    on TimeoutException{
       String recoveredData = await SaveData().readData(movieIdPath);
       data = jsonDecode(recoveredData);
       Movie movie = Movie.fromJson(data);

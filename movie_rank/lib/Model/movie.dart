@@ -5,10 +5,8 @@ class Movie {
   final String posterUrl;
   final List<dynamic> genres;
   final String releaseDate; 
-  // String tagLine;
-  // String overview;
-  // List<dynamic> productionCountries;
-  // List<dynamic> productionCompanies;
+  late String? tagLine;
+  late String? overview;
 
   Movie({
     required this.id,
@@ -17,10 +15,8 @@ class Movie {
     required this.posterUrl,
     required this.genres,
     required this.releaseDate,
-    // this.tagLine,
-    // this.overview,
-    // this.productionCountries,
-    // this.productionCompanies,
+    this.tagLine,
+    this.overview,
   });
 
   factory Movie.fromJson(Map<String, dynamic> json) {
@@ -31,10 +27,8 @@ class Movie {
       posterUrl: json['poster_url'],
       genres: json['genres'],
       releaseDate: json['release_date'],
-      // tagLine: json['tagline'],
-      // overview: json['overview'],
-      // productionCountries: json['production_countries'],
-      // productionCompanies: json['production_companies'],
+      tagLine: json['tagline'],
+      overview: json['overview'],
     );
   }
  
@@ -45,5 +39,7 @@ class Movie {
     'poster_url': posterUrl,
     'genres': genres,
     'release_date': releaseDate,
+    'tagline': tagLine,
+    'overview': overview,
   };
 }

@@ -37,7 +37,14 @@ class _MovieListState extends State<MovieList>{
         appBar: AppBar(
           backgroundColor: Colors.purple.shade300,
           elevation: 0.5,
-          title: const Text('Tokenlab - TMDB'),
+          title: Text(
+            'Tokenlab - TMDB',
+            style: TextStyle(
+              fontSize: 24, 
+              fontWeight: FontWeight.bold,
+              color: Colors.purple.shade800,
+            ),
+          ),
         ),
         body: 
         Center(
@@ -48,7 +55,7 @@ class _MovieListState extends State<MovieList>{
               if (snapshot.hasData) {
                 return _listView(snapshot);
               } else if (snapshot.hasError) {
-                print('movie_list: error reading snapshot data');
+                  print('movie_list: error reading snapshot data');
                 return const ErrorMessage();
               }
               //While fetching, show a loading spinner.
@@ -68,49 +75,46 @@ class _MovieListState extends State<MovieList>{
       padding: const EdgeInsets.all(18.0),
       itemCount: snapshot.data!.length,
       itemBuilder: (BuildContext context, int index) {
-        return _containerCachedImage(snapshot, index);
+        return Container(
+          margin: const EdgeInsets.all(18.0),
+          width: 400,
+          decoration: BoxDecoration(
+            color: Colors.purple.shade200,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: 
+            Stack(children: <Widget>[
+              Positioned.fill(
+                child: CachedNetworkImage(
+                  placeholder: (context, url) => const LoadingAnimation(),
+                  errorWidget: (context,url,error) => _containerImageNotLoaded(snapshot, index),
+                  imageUrl: snapshot.data![index].posterUrl,
+                  fadeInCurve: Curves.bounceIn,
+                  fadeInDuration: const Duration(milliseconds: 1000),
+                  imageBuilder: (context, imageProvider) => Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      image: DecorationImage(
+                          image: CachedNetworkImageProvider(snapshot.data![index].posterUrl),
+                          fit: BoxFit.fill,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned.fill(
+                child: Material(
+                  color: Colors.transparent,
+                  child:_inkWell(snapshot, index),
+                )
+              )
+            ]),
+        );
       }
     );
   }
 
-  Widget _containerCachedImage(AsyncSnapshot snapshot, int index){
-    return Container(
-      child: 
-        Stack(children: <Widget>[
-          Positioned.fill(
-            child: _cachedImage(snapshot, index),
-          ),
-          Positioned.fill(
-            child: Material(
-              color: Colors.transparent,
-              child:_inkWell(snapshot, index),
-            )
-          )
-        ]),
-      color: Colors.purple.shade200,
-      width: 400,
-      margin: const EdgeInsets.all(18.0),
-    );
-  }
-
-  CachedNetworkImage _cachedImage(AsyncSnapshot snapshot, int index){
-    return CachedNetworkImage(
-      placeholder: (context, url) => const LoadingAnimation(),
-      errorWidget: (context,url,error) => _containerImageNotLoaded(snapshot, index),
-      imageUrl: snapshot.data![index].posterUrl,
-      fadeInCurve: Curves.bounceIn,
-      fadeInDuration: const Duration(milliseconds: 1000),
-      imageBuilder: (context, imageProvider) => Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-              image: CachedNetworkImageProvider(snapshot.data![index].posterUrl),
-              fit: BoxFit.fill,
-          ),
-        ),
-      ),
-    );
-  }
-
+  //Controls the call to the second view.
   Widget _inkWell(AsyncSnapshot snapshot, int index){
     String movieId = snapshot.data![index].id.toString();
     return InkWell(
@@ -122,20 +126,28 @@ class _MovieListState extends State<MovieList>{
         );
         setState(() {});
       },
-      child: Container(
-        //color: Colors.orange,
-      ),
     );
   }
 
+  //Displays the movie title when the image could not be loaded.
   Widget _containerImageNotLoaded(AsyncSnapshot snapshot, int index){
     return Stack(children: <Widget>[
-        Positioned.fill(
-          child: Text(
-            '\n\n\n\n\n\n'+snapshot.data![index].title,
-            textAlign: TextAlign.center,
-          ),
-        )
+      Positioned.fill(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            const SizedBox(height: 30),
+            SizedBox(
+              width: 200,
+              child: Text(
+                snapshot.data![index].title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 24),
+              ),
+            ),
+          ]
+        ),
+      ),
     ]);
   }
 
